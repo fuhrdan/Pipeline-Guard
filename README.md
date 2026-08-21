@@ -6,6 +6,7 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-browser_native-F7DF1E?logo=javascript&logoColor=000)](app.js)
 [![Local First](https://img.shields.io/badge/repository_analysis-local--first-2ea44f)](#privacy-model)
 [![Status](https://img.shields.io/badge/status-active_development-2ea44f)](#project-status)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **Live demo:** [newlands.itch.io/pipeline-guard](https://newlands.itch.io/pipeline-guard)
 
