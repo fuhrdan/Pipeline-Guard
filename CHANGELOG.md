@@ -1,54 +1,119 @@
-# PipelineGuard v0.6.1
+# Changelog
 
-PipelineGuard v0.6.1 is a polish and deployment-diagnostics release. Scanner rules are intentionally unchanged from v0.6.0.
+All notable changes to Pipeline Guard are documented in this file.
 
-## What changed
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses semantic-style version numbering.
 
-### Local-first wording
-The top trust badge now reads **Local-first · live intelligence optional**. Repository/source analysis remains local; only exact package coordinates are sent when a user explicitly runs the optional advisory lookup.
+## [Unreleased]
 
-### System Status
-A new **System status** dialog reports:
-- frontend version
-- repository ZIP/Deflate browser capability
-- persistent localStorage availability
-- clipboard support
-- HTML report download support
-- fetch/AbortController support
-- relay version/reachability
-- OSV reachability from the relay
+### Planned
 
-### Test Relay
-Relay configuration now includes **Test relay**. The health request sends no repository/package content. It reports frontend/relay version alignment, relay latency, PHP cURL availability, and OSV network reachability.
+- Automated browser smoke testing with Playwright
+- GitHub Actions CI
+- Expanded rule fixtures and regression coverage
+- SARIF export
+- Additional package-ecosystem coverage
+- Richer CI integration and rule metadata
 
-### Relay health endpoint
-The v0.6.1 PHP relay supports:
+## [0.6.1] - 2026-08-18
 
-```json
-{"action":"health","frontendVersion":"0.6.1"}
-```
+### Added
 
-The response includes service/version/runtime and upstream reachability information. Advisory lookup behavior from v0.6.0 is retained.
+- System Status diagnostics for frontend/runtime capability checks
+- Relay reachability testing
+- OSV upstream-health reporting
+- Frontend/relay version-mismatch visibility
+- Relay latency visibility
+- PHP cURL availability reporting
+- Browser capability checks for ZIP/Deflate, localStorage, clipboard, HTML report download, `fetch`, and `AbortController`
 
-### Version mismatch visibility
-The UI explicitly reports when the frontend and relay are on different releases, making itch.io/HawkHost deployment mismatches much easier to diagnose.
+### Changed
 
-## Deployment
+- Clarified the product trust model with **Local-first · live intelligence optional** positioning
+- Improved deployment troubleshooting for itch.io + PHP relay deployments
+- Kept repository/source analysis local while making optional OSV behavior more explicit
+- Preserved the v0.6.0 scanner rule set without introducing rule churn in the polish release
 
-1. Upload `PipelineGuard-v0.6.1.zip` to itch.io as the browser-playable build.
-2. Replace `/public_html/relay/pipelineguard.php` with the `pipelineguard.php` from `PipelineGuard-v0.6.1-Relay.zip`.
-3. Open **System status** and click **Test relay + OSV**.
-4. A healthy deployment should show frontend **0.6.1**, relay **0.6.1**, and OSV reachable.
+### Security / Reliability
 
-The cover image remains version-neutral and is intentionally outside the itch.io ZIP.
+- Relay health checks send no repository or package content
+- Optional advisory lookup continues to send only exact package coordinates
+- Improved visibility when frontend and relay deployments are on different versions
+- Hardened the advisory lookup failure path so unavailable live intelligence does not masquerade as a clean result
 
-## Existing v0.6 features retained
+## [0.6.0] - 2026-08-18
 
-- whole-repository ZIP auditing
-- false-positive suppressions with required reason and expiration
-- First 60 Seconds demo
-- hardened live advisory retry/cache/failure path
-- GitHub Actions, Docker, Kubernetes, Terraform and supply-chain scanners
-- cross-file correlation
-- optional OSV live intelligence
-- exportable HTML reports
+### Added
+
+- Whole-repository ZIP auditing in the browser
+- Auditable false-positive suppression workflow
+- Required justification for suppressions
+- Expiration dates for suppressions
+- Stable finding fingerprints
+- Built-in **First 60 Seconds** demo repository
+- GitHub Actions / CI workflow security checks
+- Dockerfile security checks
+- Kubernetes manifest security checks
+- Terraform / Infrastructure-as-Code checks
+- Software supply-chain checks across multiple package ecosystems
+- Cross-file correlation
+- Deterministic repository security scoring
+- Optional OSV live vulnerability intelligence
+- Standalone HTML report export
+
+### Changed
+
+- Promoted false-positive management from a convenience feature to a first-class review workflow
+- Improved first-run usability so the product can be evaluated without preparing a repository
+- Expanded repository-level reasoning beyond isolated single-file findings
+
+### Security / Reliability
+
+- Hardened advisory retry/cache/failure behavior
+- Preserved local repository analysis when live advisory services are unavailable
+- Added explicit separation between local static findings and optional external vulnerability intelligence
+
+## [0.5.0] - 2026-08-18
+
+### Added
+
+- Whole-repository ZIP ingestion
+- Repository inventory and supported-file classification
+- Multi-file security review
+- Repository-level findings and scoring
+- Generated/vendor directory skipping
+- Browser-side archive processing limits
+
+### Changed
+
+- Expanded Pipeline Guard from selected-file scanning into whole-repository preflight auditing
+
+## [0.4.0] - 2026-08-18
+
+### Changed
+
+- Continued scanner expansion and repository-review workflow refinement
+- Improved presentation and usability of security findings
+
+## [0.3.0] - 2026-08-18
+
+### Changed
+
+- Expanded the early DevSecOps preflight feature set
+- Refined finding output and review workflow
+
+## [0.2.0] - 2026-08-18
+
+### Changed
+
+- Expanded the initial Pipeline Guard prototype with additional scanning and usability improvements
+
+---
+
+[Unreleased]: https://github.com/fuhrdan/Pipeline-Guard/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/fuhrdan/Pipeline-Guard/releases/tag/v0.6.1
+[0.6.0]: https://github.com/fuhrdan/Pipeline-Guard/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/fuhrdan/Pipeline-Guard/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/fuhrdan/Pipeline-Guard/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/fuhrdan/Pipeline-Guard/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/fuhrdan/Pipeline-Guard/releases/tag/v0.2.0
