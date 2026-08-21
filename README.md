@@ -7,7 +7,7 @@
 [![Local First](https://img.shields.io/badge/repository_analysis-local--first-2ea44f)](#privacy-model)
 [![Status](https://img.shields.io/badge/status-active_development-2ea44f)](#project-status)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Pipeline Guard CI](https://github.com/fuhrdan/Pipeline-Guard/actions/workflows/ci.yml/badge.svg)](https://github.com/fuhrdan/Pipeline-Guard/actions/workflows/ci.yml)
+[![Pipeline Guard CI](https://github.com/fuhrdan/Pipeline-Guard/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/fuhrdan/Pipeline-Guard/actions/workflows/ci.yml)
 
 **Live demo:** [newlands.itch.io/pipeline-guard](https://newlands.itch.io/pipeline-guard)
 
