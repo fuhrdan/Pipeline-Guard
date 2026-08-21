@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="PipelineGuard audits whole repository ZIPs plus CI/CD workflows, containers, Kubernetes, Terraform/IaC, and software dependencies directly in your browser.">
+  <title>PipelineGuard — Browser-Based DevSecOps Scanner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="PipelineGuard home">
+      <span class="brand-mark" aria-hidden="true">◆</span>
+      <span>Pipeline<span>Guard</span></span>
+    </a>
+    <div class="top-actions">
+      <span class="privacy-pill" title="Files are analyzed locally in this browser">
+        <span class="dot"></span> Local-first · live intelligence optional
+      </span>
+      <button id="quickstartBtn" class="ghost-btn" type="button">60-sec start</button>
+      <button id="suppressionsBtn" class="ghost-btn" type="button">Suppressions <span id="suppressionTopCount">0</span></button>
+      <button id="systemStatusBtn" class="ghost-btn" type="button">System status</button>
+      <button id="helpBtn" class="ghost-btn" type="button">How it works</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">DEVSECOPS SECURITY PREFLIGHT</p>
+        <h1>Catch pipeline risks <span>before production.</span></h1>
+        <p class="hero-copy">
+          Drop an entire repository ZIP or individual security-relevant files. PipelineGuard inventories the project, scans exposed
+          secrets, pipelines, containers, IaC, and dependencies, then correlates risks across files. Repository extraction stays local.
+        </p>
+      </div>
+      <div class="hero-badges" aria-label="Supported checks">
+        <span>Repository ZIP</span><span>CI/CD</span><span>Secrets</span><span>Docker</span><span>Kubernetes</span><span>Terraform</span><span>Supply Chain</span><span>Live CVEs</span>
+      </div>
+    </section>
+
+    <section id="quickstartCard" class="quickstart card" aria-label="60 second quick start">
+      <div class="quickstart-copy">
+        <p class="section-kicker">FIRST 60 SECONDS</p>
+        <h2>See PipelineGuard work before you configure anything.</h2>
+        <p>Run a focused risky-repository demo, inspect a compound CI/credential finding, suppress one with an auditable exception, then export the report. No upload or relay is needed for the demo.</p>
+      </div>
+      <div class="quickstart-steps">
+        <div><span>1</span><strong>Run demo</strong><small>~10 sec</small></div>
+        <div><span>2</span><strong>Review risk</strong><small>~30 sec</small></div>
+        <div><span>3</span><strong>Suppress / export</strong><small>~60 sec</small></div>
+      </div>
+      <div class="quickstart-actions">
+        <button id="runDemoBtn" class="primary-btn compact-primary" type="button">Run 60-second demo →</button>
+        <button id="dismissQuickstartBtn" class="text-btn" type="button">Hide quick start</button>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Pipeline scanner">
+      <aside class="input-panel card">
+        <div class="card-title-row">
+          <div>
+            <p class="section-kicker">1 · INPUT</p>
+            <h2>Add files</h2>
+          </div>
+          <button id="clearBtn" class="text-btn" type="button">Clear</button>
+        </div>
+
+        <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Drop files here or browse">
+          <div class="drop-icon" aria-hidden="true">⇧</div>
+          <strong>Drop a repository ZIP or files here</strong>
+          <span>or click to browse</span>
+          <small>.zip · CI/CD · source · Docker · K8s · Terraform · dependency manifests</small>
+          <input id="fileInput" type="file" multiple hidden
+                 accept=".zip,.yml,.yaml,.tf,.tfvars,.hcl,.txt,.conf,.cfg,.env,.json,.xml,.toml,.csproj,.fsproj,.vbproj,.props,.gradle,.kts,.lock,.mod,.dockerfile,.js,.mjs,.cjs,.ts,.tsx,.jsx,.py,.cs,.java,.go,.php,.rb,.rs,.sh,.ps1,.properties,.ini,.pem,.key">
+        </div>
+
+        <div id="repoCard" class="repo-card" hidden>
+          <div class="repo-title-row">
+            <div>
+              <span class="repo-kicker">REPOSITORY AUDIT</span>
+              <strong id="repoName">Repository</strong>
+            </div>
+            <span id="repoMode" class="repo-mode">ZIP</span>
+          </div>
+          <div class="repo-stats">
+            <div><strong id="repoEntries">0</strong><small>ZIP entries</small></div>
+            <div><strong id="repoScanned">0</strong><small>Scanned files</small></div>
+            <div><strong id="repoIgnored">0</strong><small>Ignored</small></div>
+            <div><strong id="repoSize">0 KB</strong><small>Text analyzed</small></div>
+          </div>
+          <div id="repoKinds" class="repo-kinds"></div>
+          <small class="repo-note">Generated/vendor directories and binary assets are skipped automatically. ZIP extraction happens in this browser.</small>
+        </div>
+
+        <div class="divider"><span>or paste text</span></div>
+
+        <label class="field-label" for="pasteName">Filename / type hint</label>
+        <input id="pasteName" class="text-input" value="workflow.yml" spellcheck="false">
+        <label class="field-label" for="pasteArea">Configuration</label>
+        <textarea id="pasteArea" class="paste-area" spellcheck="false"
+          placeholder="Paste a workflow, Dockerfile, Kubernetes manifest, Terraform, package.json, requirements.txt, project file, or config here…"></textarea>
+        <button id="addPasteBtn" class="secondary-btn" type="button">Add pasted text</button>
+
+        <div class="sample-row">
+          <span>Try a sample:</span>
+          <button id="badSampleBtn" class="chip-btn" type="button">Risky workflow</button>
+          <button id="dockerSampleBtn" class="chip-btn" type="button">Risky Dockerfile</button>
+          <button id="k8sSampleBtn" class="chip-btn" type="button">Risky Kubernetes</button>
+          <button id="tfSampleBtn" class="chip-btn" type="button">Risky Terraform</button>
+          <button id="npmSampleBtn" class="chip-btn" type="button">Risky npm</button>
+          <button id="pythonSampleBtn" class="chip-btn" type="button">Risky Python</button>
+        </div>
+
+        <div class="file-section">
+          <div class="mini-heading">
+            <span>Queued files</span>
+            <span id="fileCount">0</span>
+          </div>
+          <div id="fileList" class="file-list">
+            <p class="empty-state">No files added yet.</p>
+          </div>
+        </div>
+
+        <button id="scanBtn" class="primary-btn" type="button" disabled>
+          <span>Scan pipeline</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </aside>
+
+      <section class="results-panel">
+        <div class="score-card card">
+          <div class="score-gauge-wrap">
+            <div id="scoreGauge" class="score-gauge" style="--score:100">
+              <div class="score-center">
+                <strong id="scoreValue">—</strong>
+                <span>/100</span>
+              </div>
+            </div>
+          </div>
+          <div class="score-copy">
+            <p class="section-kicker">2 · SECURITY POSTURE</p>
+            <h2 id="scoreLabel">Ready to scan</h2>
+            <p id="scoreText">Add one or more files to generate a local DevSecOps preflight assessment.</p>
+            <p id="suppressionScoreNote" class="suppression-score-note" hidden></p>
+          </div>
+          <div class="stat-grid" aria-label="Finding counts">
+            <div><span class="sev-dot critical"></span><strong id="criticalCount">0</strong><small>Critical</small></div>
+            <div><span class="sev-dot high"></span><strong id="highCount">0</strong><small>High</small></div>
+            <div><span class="sev-dot medium"></span><strong id="mediumCount">0</strong><small>Medium</small></div>
+            <div><span class="sev-dot low"></span><strong id="lowCount">0</strong><small>Low</small></div>
+          </div>
+        </div>
+
+        <div class="pipeline-strip card" aria-label="Analysis stages">
+          <div class="stage" data-stage="input"><span>1</span><div><strong>Input</strong><small>Files / repository</small></div></div>
+          <div class="connector"></div>
+          <div class="stage" data-stage="secrets"><span>2</span><div><strong>Secrets</strong><small>Credential patterns</small></div></div>
+          <div class="connector"></div>
+          <div class="stage" data-stage="cicd"><span>3</span><div><strong>CI/CD</strong><small>Workflow security</small></div></div>
+          <div class="connector"></div>
+          <div class="stage" data-stage="docker"><span>4</span><div><strong>Containers</strong><small>Docker + Kubernetes</small></div></div>
+          <div class="connector"></div>
+          <div class="stage" data-stage="iac"><span>5</span><div><strong>IaC</strong><small>Terraform exposure</small></div></div>
+          <div class="connector"></div>
+          <div class="stage" data-stage="supply"><span>6</span><div><strong>Supply chain</strong><small>Dependency hygiene</small></div></div>
+          <div class="connector"></div>
+          <div class="stage" data-stage="correlate"><span>7</span><div><strong>Correlate</strong><small>Cross-file risks</small></div></div>
+          <div class="connector"></div>
+          <div class="stage" data-stage="report"><span>8</span><div><strong>Report</strong><small>Project posture</small></div></div>
+        </div>
+
+        <div class="live-card card">
+          <div class="card-title-row">
+            <div>
+              <p class="section-kicker">LIVE INTELLIGENCE · OPTIONAL</p>
+              <h2>Known-vulnerability lookup</h2>
+            </div>
+            <span id="liveStatus" class="live-status">Not checked</span>
+          </div>
+          <p class="live-copy">After a local scan, PipelineGuard can send only exact package coordinates (ecosystem, package name, version) to your relay for OSV advisory matching. Source files and secrets are not sent.</p>
+          <div id="liveMessage" class="live-message" hidden></div>
+          <div class="live-grid">
+            <div><strong id="livePackages">0</strong><small>Exact versions found</small></div>
+            <div><strong id="liveVulns">0</strong><small>Known advisories</small></div>
+            <div><strong id="liveCritical">0</strong><small>Critical/high</small></div>
+            <div><strong id="liveFixable">0</strong><small>Fix version noted</small></div>
+          </div>
+          <details class="relay-details">
+            <summary>Relay configuration</summary>
+            <label class="field-label" for="relayUrl">Relay URL</label>
+            <div class="relay-row relay-row-actions">
+              <input id="relayUrl" class="text-input" spellcheck="false" value="https://lakehousesoftware.com/relay/pipelineguard.php">
+              <button id="saveRelayBtn" class="secondary-btn compact" type="button">Save</button>
+              <button id="testRelayBtn" class="secondary-btn compact" type="button">Test relay</button>
+            </div>
+            <div id="relaySummary" class="relay-summary">Frontend 0.6.1 · Relay not tested</div>
+            <small>The relay URL is stored only in this browser's localStorage. Health tests do not send repository content.</small>
+          </details>
+        </div>
+
+        <div class="findings-card card">
+          <div class="card-title-row findings-header">
+            <div>
+              <p class="section-kicker">3 · FINDINGS</p>
+              <h2>Prioritized remediation</h2>
+            </div>
+            <div class="report-actions">
+              <button id="manageSuppressionsBtn" class="ghost-btn" type="button">Manage suppressions</button>
+              <button id="copyBtn" class="ghost-btn" type="button" disabled>Copy summary</button>
+              <button id="liveBtn" class="ghost-btn" type="button" disabled>Check live advisories</button>
+              <button id="exportBtn" class="ghost-btn" type="button" disabled>Export report</button>
+            </div>
+          </div>
+
+          <div id="filters" class="filters" aria-label="Finding filters">
+            <button class="filter active" data-filter="all" type="button">All <span id="allBadge">0</span></button>
+            <button class="filter" data-filter="critical" type="button">Critical</button>
+            <button class="filter" data-filter="high" type="button">High</button>
+            <button class="filter" data-filter="medium" type="button">Medium</button>
+            <button class="filter" data-filter="low" type="button">Low</button>
+            <button class="filter" data-filter="info" type="button">Info</button>
+            <button class="filter" data-filter="suppressed" type="button">Suppressed <span id="suppressedBadge">0</span></button>
+          </div>
+
+          <div id="findings" class="findings">
+            <div class="results-empty">
+              <div class="empty-shield" aria-hidden="true">◇</div>
+              <strong>No scan results yet</strong>
+              <p>Your files stay on this device. Add files and run a scan to see prioritized findings.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="feature-grid" aria-label="PipelineGuard features">
+      <article class="feature card">
+        <span class="feature-icon">ZIP</span>
+        <h3>Whole-repository audit</h3>
+        <p>Unpacks repository ZIPs locally, skips generated/vendor content, inventories security-relevant files, and scans source code for secrets.</p>
+      </article>
+      <article class="feature card">
+        <span class="feature-icon">⌁</span>
+        <h3>Secrets detection</h3>
+        <p>Flags common credential formats and suspicious hardcoded secret assignments while redacting evidence.</p>
+      </article>
+      <article class="feature card">
+        <span class="feature-icon">⚙</span>
+        <h3>Workflow hardening</h3>
+        <p>Checks action pinning, token permissions, dangerous triggers, shell patterns, and untrusted interpolation.</p>
+      </article>
+      <article class="feature card">
+        <span class="feature-icon">▣</span>
+        <h3>Docker checks</h3>
+        <p>Reviews image tags, root execution, build-time secrets, remote ADD instructions, and risky shell installs.</p>
+      </article>
+      <article class="feature card">
+        <span class="feature-icon">⎈</span>
+        <h3>Kubernetes posture</h3>
+        <p>Finds privileged workloads, host access, root execution, weak security contexts, risky mounts, and token exposure.</p>
+      </article>
+      <article class="feature card">
+        <span class="feature-icon">◇</span>
+        <h3>Terraform / IaC</h3>
+        <p>Reviews public ingress, public databases, storage access controls, wildcard IAM, encryption, and cloud metadata settings.</p>
+      </article>
+      <article class="feature card">
+        <span class="feature-icon">⇄</span>
+        <h3>Dependency hygiene</h3>
+        <p>Reviews npm, Python, NuGet, Maven, and Gradle manifests for dynamic versions, insecure sources, install hooks, reproducibility gaps, and optional live advisories.</p>
+      </article>
+      <article class="feature card">
+        <span class="feature-icon">⇆</span>
+        <h3>Cross-file correlation</h3>
+        <p>Combines related findings across CI, containers, cloud infrastructure, credentials, and package installation to surface compound repository risks.</p>
+      </article>
+      <article class="feature card">
+        <span class="feature-icon">⊘</span>
+        <h3>Auditable suppressions</h3>
+        <p>Suppress false positives with a required justification and expiration date. Exceptions persist locally, expire automatically, and remain visible in reports.</p>
+      </article>
+      <article class="feature card">
+        <span class="feature-icon">✓</span>
+        <h3>Actionable report</h3>
+        <p>Produces deterministic scoring, line-level evidence, suggested fixes, and a standalone HTML report.</p>
+      </article>
+    </section>
+
+    <section class="limitations card">
+      <div>
+        <p class="section-kicker">SCOPE</p>
+        <h2>Static preflight, not a penetration test</h2>
+      </div>
+      <p>
+        PipelineGuard v0.6.1 uses local repository extraction, pattern analysis, configuration rules, and cross-file correlation.
+        It does not execute uploaded code or prove that a detected credential is valid. Optional live advisory checks query OSV through the configured relay.
+        Review findings before changing production systems.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <span>PipelineGuard v0.6.1</span>
+    <span>Local-first DevSecOps preflight scanner</span>
+  </footer>
+
+  <dialog id="systemStatusDialog">
+    <div class="dialog-card wide-dialog status-dialog-card">
+      <button class="dialog-close" type="button" data-close-dialog="systemStatusDialog" aria-label="Close">×</button>
+      <p class="section-kicker">SYSTEM STATUS</p>
+      <h2>Runtime & deployment diagnostics</h2>
+      <p class="dialog-note">These checks help distinguish a browser limitation, frontend/relay version mismatch, or upstream advisory outage. Repository contents are not sent by this screen.</p>
+      <div class="status-grid">
+        <div class="status-row"><span>Frontend</span><strong id="statusFrontend">0.6.1</strong><em class="status-ok">Ready</em></div>
+        <div class="status-row"><span>Repository ZIP</span><strong id="statusZip">Checking…</strong><em id="statusZipState">—</em></div>
+        <div class="status-row"><span>Persistent storage</span><strong id="statusStorage">Checking…</strong><em id="statusStorageState">—</em></div>
+        <div class="status-row"><span>Clipboard</span><strong id="statusClipboard">Checking…</strong><em id="statusClipboardState">—</em></div>
+        <div class="status-row"><span>Report download</span><strong id="statusDownload">Checking…</strong><em id="statusDownloadState">—</em></div>
+        <div class="status-row"><span>Live networking</span><strong id="statusNetwork">Checking…</strong><em id="statusNetworkState">—</em></div>
+        <div class="status-row"><span>Relay</span><strong id="statusRelay">Not tested</strong><em id="statusRelayState">—</em></div>
+        <div class="status-row"><span>OSV upstream</span><strong id="statusOsv">Not tested</strong><em id="statusOsvState">—</em></div>
+      </div>
+      <div id="statusMessage" class="live-message" hidden></div>
+      <div class="status-actions">
+        <button id="statusTestRelayBtn" class="primary-btn compact-primary" type="button">Test relay + OSV</button>
+        <button id="statusRefreshBtn" class="ghost-btn" type="button">Refresh browser checks</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="helpDialog">
+    <form method="dialog" class="dialog-card">
+      <button class="dialog-close" value="close" aria-label="Close">×</button>
+      <p class="section-kicker">HOW IT WORKS</p>
+      <h2>Local static analysis</h2>
+      <ol>
+        <li>Add individual files or a repository ZIP. ZIP contents are unpacked and filtered locally in the browser.</li>
+        <li>PipelineGuard reads the text with JavaScript in your browser.</li>
+        <li>Rules evaluate secrets, CI/CD controls, containers, cloud IaC, dependency manifests, package sources, install hooks, and compound cross-file risks.</li>
+        <li>Findings are scored by severity and displayed with remediation guidance.</li>
+      </ol>
+      <p class="dialog-note"><strong>Privacy:</strong> v0.6.1 keeps local scanning local; live advisory checks send only package names, ecosystems, and versions to your configured relay. Your scan input is not intentionally transmitted by PipelineGuard.</p>
+      <button class="primary-btn" value="close">Got it</button>
+    </form>
+  </dialog>
+
+  <dialog id="suppressDialog">
+    <form id="suppressForm" class="dialog-card">
+      <button class="dialog-close" type="button" data-close-dialog="suppressDialog" aria-label="Close">×</button>
+      <p class="section-kicker">FALSE-POSITIVE MANAGEMENT</p>
+      <h2>Suppress this finding</h2>
+      <p id="suppressFindingTitle" class="dialog-note"></p>
+      <input id="suppressFingerprint" type="hidden">
+      <label class="field-label" for="suppressReason">Justification / reason <span class="required">required</span></label>
+      <textarea id="suppressReason" class="paste-area compact-area" required minlength="5" placeholder="Why is this finding acceptable or a false positive in this project?"></textarea>
+      <label class="field-label" for="suppressExpiry">Expiration date <span class="required">required</span></label>
+      <input id="suppressExpiry" class="text-input" type="date" required>
+      <p class="dialog-note">When the expiration date passes, this finding automatically returns to the active results and score. Suppressions are stored only in this browser.</p>
+      <button class="primary-btn" type="submit">Save suppression</button>
+    </form>
+  </dialog>
+
+  <dialog id="suppressionsDialog">
+    <div class="dialog-card wide-dialog">
+      <button class="dialog-close" type="button" data-close-dialog="suppressionsDialog" aria-label="Close">×</button>
+      <p class="section-kicker">EXCEPTION REGISTER</p>
+      <h2>Finding suppressions</h2>
+      <p class="dialog-note">Active suppressions are excluded from the score until their expiration date. Expired records remain visible here until removed.</p>
+      <div id="suppressionList" class="suppression-list"></div>
+      <button class="secondary-btn" type="button" data-close-dialog="suppressionsDialog">Close</button>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
