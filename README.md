@@ -658,15 +658,14 @@ It demonstrates practical work across:
 - failure-aware external service handling
 - false-positive governance
 - reporting and security UX
-
+- automated browser smoke testing (updated)
+- GitHub Actions CI (updated)
 ---
 
 ## Repository Roadmap
 
 Useful future improvements include:
 
-- automated browser smoke testing
-- GitHub Actions CI
 - expanded rule test fixtures
 - additional package ecosystems
 - SARIF export
