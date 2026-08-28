@@ -1,0 +1,23 @@
+name: Pipeline Guard
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  security-preflight:
+    name: Pipeline Guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Pipeline Guard
+        uses: fuhrdan/Pipeline-Guard@v0.7.0
+        with:
+          fail-on: high
