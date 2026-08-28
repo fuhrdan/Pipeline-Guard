@@ -1,0 +1,36 @@
+name: "Pipeline Guard"
+description: "Run Pipeline Guard against the checked-out repository, emit PR annotations, generate SARIF, and enforce a severity gate."
+author: "Daniel Fuhr"
+branding:
+  icon: "shield"
+  color: "blue"
+inputs:
+  fail-on:
+    description: "Fail when a finding is at or above this severity: none, critical, high, medium, low, info."
+    required: false
+    default: "high"
+runs:
+  using: "composite"
+  steps:
+    - name: Install Pipeline Guard runtime
+      shell: bash
+      run: |
+        cd "${{ github.action_path }}"
+        npm ci
+        npx playwright install --with-deps chromium
+
+    - name: Scan repository
+      shell: bash
+      run: |
+        node "${{ github.action_path }}/scripts/ci-scan.mjs" \
+          --app "${{ github.action_path }}" \
+          --repo "${GITHUB_WORKSPACE}" \
+          --fail-on "${{ inputs.fail-on }}" \
+          --sarif "${GITHUB_WORKSPACE}/pipeline-guard.sarif"
+
+    - name: Upload SARIF
+      if: always()
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: ${{ github.workspace }}/pipeline-guard.sarif
+        category: pipeline-guard
