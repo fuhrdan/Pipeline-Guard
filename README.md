@@ -26,6 +26,23 @@ The project is built around a simple operational goal:
 Pipeline Guard is a static preflight scanner. It does not execute uploaded code and is not intended to replace penetration testing, runtime security tooling, or a full enterprise SAST/SCA platform.
 
 ---
+## Engineering Decisions
+
+Pipeline Guard is built around explicit security and trust-boundary decisions rather than treating scanning as a collection of independent rules.
+
+| Decision                                                                                             | Why it matters                                                                                                                                            |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [**ADR-0001 — Local-first repository analysis**](docs/adr/0001-local-first-repository-analysis.md)   | Core source analysis stays inside the browser, reducing source-code exposure and avoiding an unnecessary centralized repository-upload trust boundary.    |
+| [**ADR-0002 — Optional advisory relay boundary**](docs/adr/0002-optional-advisory-relay-boundary.md) | External vulnerability intelligence receives only the minimum package coordinates required for lookup, and relay failure must not disable local scanning. |
+| [**ADR-0003 — Auditable finding suppressions**](docs/adr/0003-auditable-suppressions.md)             | Suppressions require justification and expiration, preserving security evidence while allowing legitimate false-positive and risk-acceptance workflows.   |
+
+These decisions reflect three recurring principles:
+
+* **Minimize trust boundaries** — repository source remains local unless a capability explicitly requires external data.
+* **Fail gracefully** — optional external intelligence can degrade without preventing the core scanner from completing.
+* **Preserve security evidence** — findings may be contextualized or suppressed, but they are not silently erased.
+
+The ADRs document architectural decisions already represented by Pipeline Guard's implementation and operating model.
 
 ## Screenshot
 
